@@ -4,4 +4,6 @@ public sealed class Request {
     public required string Url { get; init; }
     public required Dictionary<string, string> Headers { get; init; }
     public required byte[] Content { get; init; }
+    public required Dictionary<string, string> UrlParams { get; init; }
+
 }

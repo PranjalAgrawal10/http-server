@@ -37,8 +37,11 @@ public sealed class RequestReader {
       headers[key] = value;
     }
     var bodyBytes = ReadUntilNewLine(bytes);
-    return new Request { Headers = headers, Method = new HttpMethod(parts[0]),
-                         Url = parts[1], Content = bodyBytes.ToArray() };
+    return new Request { 
+      Headers = headers, Method = new HttpMethod(parts[0]), 
+      Url = parts[1], Content = bodyBytes.ToArray(), 
+      UrlParams = []
+    };
   }
   private static (string Key, string Value) ParseHeader(string s) {
     var separatorIndex = s.IndexOf(':');
