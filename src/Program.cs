@@ -4,7 +4,8 @@ using codecrafters_http_server;
 
 string? directory = null;
 
-if (args.Length > 0 && args[0] == "--directory") {
+if (args.Length > 0 && args[0] == "--directory")
+{
     directory = args[1];
 }
 
@@ -16,7 +17,8 @@ server.RegisterEndpoint("/", HttpMethod.Get, context =>
     return Task.CompletedTask;
 });
 
-server.RegisterEndpoint("/echo/{s}", HttpMethod.Get, context => {
+server.RegisterEndpoint("/echo/{s}", HttpMethod.Get, context =>
+{
     context.Response.StatusCode = HttpStatusCode.OK;
     var s = context.Request.UrlParams["s"];
     context.Response.Headers.Add("Content-Type", "text/plain");
@@ -24,7 +26,8 @@ server.RegisterEndpoint("/echo/{s}", HttpMethod.Get, context => {
     return Task.CompletedTask;
 });
 
-server.RegisterEndpoint("/user-agent", HttpMethod.Get, context => {
+server.RegisterEndpoint("/user-agent", HttpMethod.Get, context =>
+{
     context.Response.StatusCode = HttpStatusCode.OK;
     var userAgent = context.Request.Headers["User-Agent"];
     context.Response.Headers.Add("Content-Type", "text/plain");
@@ -33,7 +36,8 @@ server.RegisterEndpoint("/user-agent", HttpMethod.Get, context => {
 });
 
 
-server.RegisterEndpoint("/files/{file-name}", HttpMethod.Get, async context => {
+server.RegisterEndpoint("/files/{file-name}", HttpMethod.Get, async context =>
+{
 
     if (directory is null)
     {
@@ -55,15 +59,18 @@ server.RegisterEndpoint("/files/{file-name}", HttpMethod.Get, async context => {
     context.Response.StatusCode = HttpStatusCode.OK;
 });
 
-server.RegisterEndpoint("/files/{file-name}", HttpMethod.Post, async context => {
-        if (directory is null) {
-            context.Response.StatusCode = HttpStatusCode.NotFound;
-            return;
-        }
-        var fileName = context.Request.UrlParams["file-name"];
-        var path = Path.Combine(directory, fileName);
-        await File.WriteAllBytesAsync(path, context.Request.Content);
-        context.Response.StatusCode = HttpStatusCode.Created;
-    });
+server.RegisterEndpoint("/files/{file-name}", HttpMethod.Post, async context =>
+{
+    if (directory is null)
+    {
+        context.Response.StatusCode = HttpStatusCode.NotFound;
+        return;
+    }
+
+    var fileName = context.Request.UrlParams["file-name"];
+    var path = Path.Combine(directory, fileName);
+    await File.WriteAllBytesAsync(path, context.Request.Content);
+    context.Response.StatusCode = HttpStatusCode.Created;
+});
 
 await server.RunAsync(CancellationToken.None);
