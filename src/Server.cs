@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-
 namespace codecrafters_http_server;
 public delegate Task RequestHandler(HttpContext context);
 
@@ -17,27 +16,24 @@ public sealed class Server {
       var socket = await server.AcceptSocketAsync(cancellationToken);
       _ = HandleRequest(socket, cancellationToken);
     }
-    // await socket.SendAsync("HTTP/1.1 200 OK\r\n\r\n"u8.ToArray());
+    
   }
-  private async Task HandleRequest(Socket socket, CancellationToken cancellationToken) {
+  private async Task HandleRequest(Socket socket, CancellationToken cancellationToken)
+  {
     try {
       var request = await ReadRequestAsync(socket, cancellationToken);
-      var response = new Response { 
-        StatusCode = HttpStatusCode.Accepted,
-        Headers = [], 
-        Content = [] 
-      };
-      
+      var response = new Response { StatusCode = HttpStatusCode.Accepted,
+                                    Headers = [], Content = [] };
       var context = new HttpContext { Request = request, Response = response };
       
       if (_handlers.TryGetValue(request.Url, out var handler)) {
         await handler(context);
-      } else if (Route.TryParse(request.Url, out var route) && _handlersWithParameters.TryGetValue(route, out handler))
+      } else if (Route.TryParse(request.Url, out var route) &&
+                 _handlersWithParameters.TryGetValue(route, request.Method, out handler))
       {
-        
-        foreach (var segment in route.ParametersSegments)
+        foreach (var segment in route.ParametersSegments) {
           request.UrlParams[segment.ParameterName!] = segment.Value!;
-        
+        }
         await handler!(context);
         
       } else {
@@ -56,21 +52,19 @@ public sealed class Server {
     var reader = new RequestReader(socket);
     return await reader.ReadAsync(cancellationToken);
   }
-  private static async Task WriteResponseAsync(Socket socket, Response response, CancellationToken cancellationToken) {
+  private static async
+      Task WriteResponseAsync(Socket socket, Response response,
+                              CancellationToken cancellationToken) {
     var writer = new ResponseWriter(socket);
     await writer.WriteResponseAsync(response, cancellationToken);
   }
-  
-  public void RegisterEndpoint(string route, RequestHandler handler) {
-    
-    if (!Route.TryParse(route, out var r)) {
+  public void RegisterEndpoint(string route, HttpMethod method, RequestHandler handler) {
+    if (!Route.TryParse(route, out var r)) 
       throw new ArgumentException("Invalid route", nameof(route));
-    }
 
     var insertResult = r.ContainsParameters
-      ? _handlersWithParameters.Insert(r, handler)
-      : _handlers.TryAdd(route, handler);
-  
+                           ? _handlersWithParameters.Insert(r, method, handler)
+                           : _handlers.TryAdd(route, handler);
     if (!insertResult) {
       throw new ArgumentException("Route already registered", nameof(route));
     }

@@ -36,7 +36,7 @@ public sealed class RequestReader {
       var (key, value) = ParseHeader(headerString);
       headers[key] = value;
     }
-    var bodyBytes = ReadUntilNewLine(bytes);
+    var bodyBytes = bytes;
     return new Request { 
       Headers = headers, Method = new HttpMethod(parts[0]), 
       Url = parts[1], Content = bodyBytes.ToArray(), 

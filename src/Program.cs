@@ -10,12 +10,13 @@ if (args.Length > 0 && args[0] == "--directory") {
 
 var server = new Server();
 
-server.RegisterEndpoint("/", context => {
+server.RegisterEndpoint("/", HttpMethod.Get, context =>
+{
     context.Response.StatusCode = HttpStatusCode.OK;
     return Task.CompletedTask;
 });
 
-server.RegisterEndpoint("/echo/{s}", context => {
+server.RegisterEndpoint("/echo/{s}", HttpMethod.Get, context => {
     context.Response.StatusCode = HttpStatusCode.OK;
     var s = context.Request.UrlParams["s"];
     context.Response.Headers.Add("Content-Type", "text/plain");
@@ -24,7 +25,7 @@ server.RegisterEndpoint("/echo/{s}", context => {
     return Task.CompletedTask;
 });
 
-server.RegisterEndpoint("/user-agent", context => {
+server.RegisterEndpoint("/user-agent", HttpMethod.Get, context => {
     context.Response.StatusCode = HttpStatusCode.OK;
     var userAgent = context.Request.Headers["User-Agent"];
     context.Response.Headers.Add("Content-Type", "text/plain");
@@ -34,8 +35,8 @@ server.RegisterEndpoint("/user-agent", context => {
 });
 
 
-server.RegisterEndpoint("/files/{file-name}", async context =>
-{
+server.RegisterEndpoint("/files/{file-name}", HttpMethod.Get, async context => {
+
     if (directory is null)
     {
         context.Response.StatusCode = HttpStatusCode.NotFound;
@@ -56,4 +57,16 @@ server.RegisterEndpoint("/files/{file-name}", async context =>
     context.Response.Content = Encoding.UTF8.GetBytes(content);
     context.Response.StatusCode = HttpStatusCode.OK;
 });
+
+server.RegisterEndpoint("/files/{file-name}", HttpMethod.Post, async context => {
+        if (directory is null) {
+            context.Response.StatusCode = HttpStatusCode.NotFound;
+            return;
+        }
+        var fileName = context.Request.UrlParams["file-name"];
+        var path = Path.Combine(directory, fileName);
+        await File.WriteAllBytesAsync(path, context.Request.Content);
+        context.Response.StatusCode = HttpStatusCode.Created;
+    });
+
 await server.RunAsync(CancellationToken.None);
