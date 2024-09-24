@@ -41,8 +41,14 @@ public sealed class Server {
       }
 
       if (request.Headers.TryGetValue("Accept-Encoding", out var value)) {
-        if (Enum.TryParse<CompressionType>(value, ignoreCase: true, out _)) {
-          response.Headers["Content-Encoding"] = value;
+        var values = value.Split(',', StringSplitOptions.RemoveEmptyEntries |
+                                      StringSplitOptions.TrimEntries);
+        foreach (var compression in values) {
+          if (!Enum.TryParse<CompressionType>(compression, ignoreCase: true,
+                out _))
+            continue;
+          response.Headers["Content-Encoding"] = compression;
+          break;
         }
       }
       
