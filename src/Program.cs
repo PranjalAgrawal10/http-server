@@ -11,6 +11,17 @@ server.RegisterEndpoint("/echo/{s}", context => {
     context.Response.Content = Encoding.UTF8.GetBytes(s);
     return Task.CompletedTask;
 });
+
+server.RegisterEndpoint("/user-agent", context => {
+    context.Response.StatusCode = HttpStatusCode.OK;
+    var userAgent = context.Request.Headers["User-Agent"];
+    context.Response.Headers.Add("Content-Type", "text/plain");
+    context.Response.Headers.Add("Content-Length", userAgent.Length.ToString());
+    context.Response.Content = Encoding.UTF8.GetBytes(userAgent);
+    return Task.CompletedTask;
+});
+
+
 server.RegisterEndpoint("/", context => {
     context.Response.StatusCode = HttpStatusCode.OK;
     return Task.CompletedTask;
