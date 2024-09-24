@@ -39,6 +39,12 @@ public sealed class Server {
       } else {
         response.StatusCode = HttpStatusCode.NotFound;
       }
+
+      if (request.Headers.TryGetValue("Accept-Encoding", out var value)) {
+        if (Enum.TryParse<CompressionType>(value, ignoreCase: true, out _)) {
+          response.Headers["Content-Encoding"] = value;
+        }
+      }
       
       await WriteResponseAsync(socket, response, cancellationToken);
       

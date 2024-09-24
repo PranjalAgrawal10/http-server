@@ -20,7 +20,6 @@ server.RegisterEndpoint("/echo/{s}", HttpMethod.Get, context => {
     context.Response.StatusCode = HttpStatusCode.OK;
     var s = context.Request.UrlParams["s"];
     context.Response.Headers.Add("Content-Type", "text/plain");
-    context.Response.Headers.Add("Content-Length", s.Length.ToString());
     context.Response.Content = Encoding.UTF8.GetBytes(s);
     return Task.CompletedTask;
 });
@@ -29,7 +28,6 @@ server.RegisterEndpoint("/user-agent", HttpMethod.Get, context => {
     context.Response.StatusCode = HttpStatusCode.OK;
     var userAgent = context.Request.Headers["User-Agent"];
     context.Response.Headers.Add("Content-Type", "text/plain");
-    context.Response.Headers.Add("Content-Length", userAgent.Length.ToString());
     context.Response.Content = Encoding.UTF8.GetBytes(userAgent);
     return Task.CompletedTask;
 });
@@ -53,7 +51,6 @@ server.RegisterEndpoint("/files/{file-name}", HttpMethod.Get, async context => {
 
     var content = await File.ReadAllTextAsync(path);
     context.Response.Headers.Add("Content-Type", "application/octet-stream");
-    context.Response.Headers.Add("Content-Length", content.Length.ToString());
     context.Response.Content = Encoding.UTF8.GetBytes(content);
     context.Response.StatusCode = HttpStatusCode.OK;
 });
